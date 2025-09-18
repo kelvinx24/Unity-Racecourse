@@ -56,8 +56,6 @@ public class SplineCreator : MonoBehaviour
     public RacerStatus AdvanceRacer(float alreadyCovered, float speed, float deltaTime)
     {
         float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
-        Debug.Log("Starting Distance: " +  alreadyCovered);
-        Debug.Log("Current Distance: " + currentDistance);
 
         /*
         if (currentDistance < segmentSamples[0].Cumulative)
@@ -98,11 +96,16 @@ public class SplineCreator : MonoBehaviour
 
         SegmentSample secondSample = segmentSamples[low];
 
+        Debug.Log("Cumulative Distance: " + currentDistance);
+        Debug.Log("First End: " + firstSample);
+        Debug.Log("Second End: " + secondSample);
+
         float denominator = secondSample.Cumulative - firstSample.Cumulative;
         float scaler = denominator == 0 ? 0f : (currentDistance - firstSample.Cumulative) / denominator;
         scaler = Mathf.Clamp01(scaler);
 
-        float interpolatedT = firstSample.SegmentT + scaler * (secondSample.SegmentT - firstSample.SegmentT);
+        float firstT = firstSample.SegmentT % 1;
+        float interpolatedT = firstT + scaler * (secondSample.SegmentT - firstT);
 
         int numPoints = positions.Length;
 
@@ -113,6 +116,13 @@ public class SplineCreator : MonoBehaviour
         Vector3 next = positions[(secondSample.SegmentIndex + 2) % numPoints];
 
         Vector3 runnerPos = CatmullRomPoint(prev, first, second, next, interpolatedT);
+        Debug.Log("Prev: " + prev);
+        Debug.Log("First: " + first);
+        Debug.Log("Second: " + second);
+        Debug.Log("Next: " + next);
+        Debug.Log("T: " + interpolatedT);
+        Debug.Log("Final Position: " + runnerPos);
+
         Vector3 tangent = CatmullRomTangent(prev, first, second, next, interpolatedT);
         Vector3 heading = Vector3.Cross(Vector3.up, tangent);
 
@@ -212,6 +222,7 @@ public class SplineCreator : MonoBehaviour
 
                 int sampleIndex = j * samplesPerSegment + ((int)k - 1);
                 segmentSamples[sampleIndex] = new(cumulativeArcLength, j, segT, curvePoint);
+                Debug.Log(segmentSamples[sampleIndex]); 
 
                 previousPoint = curvePoint;
             }

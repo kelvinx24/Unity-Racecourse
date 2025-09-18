@@ -32,7 +32,7 @@ public class Race : MonoBehaviour
             RacerStatus newRacerStatus = splineCreator.AdvanceRacer(racerDistance[i], r.runningSpeed, Time.deltaTime);
 
             r.transform.position = newRacerStatus.position;
-            r.transform.eulerAngles = newRacerStatus.heading;
+            //r.transform.eulerAngles = newRacerStatus.heading;
 
             racerDistance[i] = newRacerStatus.distanceCovered;
         }
