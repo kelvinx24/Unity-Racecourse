@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// A race with racers that are running on a track
 public class Race : MonoBehaviour
 {
     public List<Racer> racerList = new List<Racer>();
@@ -32,7 +33,7 @@ public class Race : MonoBehaviour
             RacerStatus newRacerStatus = splineCreator.AdvanceRacer(racerDistance[i], r.runningSpeed, Time.deltaTime);
 
             r.transform.position = newRacerStatus.position;
-            //r.transform.eulerAngles = newRacerStatus.heading;
+            r.transform.rotation = newRacerStatus.heading;
 
             racerDistance[i] = newRacerStatus.distanceCovered;
         }

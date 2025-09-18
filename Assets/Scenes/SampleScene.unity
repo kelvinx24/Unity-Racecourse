@@ -122,6 +122,25 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &169764523 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+  m_PrefabInstance: {fileID: 239312698}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &169764524
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 169764523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e8134abb4519a54ea6297d85c538000, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  racerName: McQueen
+  runningSpeed: 2.29
 --- !u!1 &237723731
 GameObject:
   m_ObjectHideFlags: 0
@@ -227,6 +246,66 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 237723731}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1001 &239312698
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      propertyPath: m_Name
+      value: Racer
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 169764524}
+  m_SourcePrefab: {fileID: 100100000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
 --- !u!1 &266123342
 GameObject:
   m_ObjectHideFlags: 0
@@ -1158,8 +1237,9 @@ GameObject:
   m_Component:
   - component: {fileID: 2022949638}
   - component: {fileID: 2022949637}
+  - component: {fileID: 2022949639}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: RaceManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1187,7 +1267,7 @@ MonoBehaviour:
   - {fileID: 266123343}
   - {fileID: 237723732}
   linePrefab: {fileID: 5746086860954144375, guid: 35b0cee8a519e5a498345841d755af09, type: 3}
-  stepSize: 2
+  samplesPerSegment: 50
   looping: 1
 --- !u!4 &2022949638
 Transform:
@@ -1204,6 +1284,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2022949639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022949636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d5fac92fff767b45846b01fd093988c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  racerList:
+  - {fileID: 169764524}
+  splineCreator: {fileID: 2022949637}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1219,3 +1314,4 @@ SceneRoots:
   - {fileID: 266123343}
   - {fileID: 237723732}
   - {fileID: 2022949638}
+  - {fileID: 239312698}

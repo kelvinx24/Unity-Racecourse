@@ -57,21 +57,7 @@ public class SplineCreator : MonoBehaviour
     {
         float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
 
-        /*
-        if (currentDistance < segmentSamples[0].Cumulative)
-        {
-            SegmentSample first = segmentSamples[segmentSamples.Length - 1];
-            SegmentSample second = segmentSamples[0];
-
-            float denominator = second.Cumulative - 0f;
-            float scaler = denominator == 0 ? 0f : (currentDistance - 0f) / denominator;
-            scaler = Mathf.Clamp01(scaler);
-
-            float interpolatedT = 0f + scaler * (second.SegmentT - 0f);
-
-        }
-        */
-
+        // Binary search for closest two samples
         int low = 0, high = segmentSamples.Length - 1;
         while (low < high)
         {
@@ -87,8 +73,8 @@ public class SplineCreator : MonoBehaviour
 
         }
 
+        // Covers start of the track
         SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Length - 1].Position);
-
         if (low > 0)
         {
             firstSample = segmentSamples[low - 1];
@@ -100,15 +86,19 @@ public class SplineCreator : MonoBehaviour
         Debug.Log("First End: " + firstSample);
         Debug.Log("Second End: " + secondSample);
 
+        // Calculates progress between the two samples to get t for current segment
         float denominator = secondSample.Cumulative - firstSample.Cumulative;
         float scaler = denominator == 0 ? 0f : (currentDistance - firstSample.Cumulative) / denominator;
         scaler = Mathf.Clamp01(scaler);
-
+        // Since we do not include start of segments, we convert the end of the previous segment if necessary
         float firstT = firstSample.SegmentT % 1;
         float interpolatedT = firstT + scaler * (secondSample.SegmentT - firstT);
 
         int numPoints = positions.Length;
 
+        // Using t and the current curve's points, we determine the position, tangent, and normal
+        // First and second should always be in the same curve; however
+        // second segment index is used for same reason as last comment
         int prevIndex = Math.Abs((secondSample.SegmentIndex - 1) % numPoints);
         Vector3 prev = positions[prevIndex];
         Vector3 first = positions[(secondSample.SegmentIndex) % numPoints];
@@ -123,8 +113,8 @@ public class SplineCreator : MonoBehaviour
         Debug.Log("T: " + interpolatedT);
         Debug.Log("Final Position: " + runnerPos);
 
-        Vector3 tangent = CatmullRomTangent(prev, first, second, next, interpolatedT);
-        Vector3 heading = Vector3.Cross(Vector3.up, tangent);
+        Vector3 tangent = CatmullRomTangent(prev, first, second, next, interpolatedT).normalized;
+        Quaternion heading = Quaternion.LookRotation(tangent, Vector3.up);
 
         return new RacerStatus(currentDistance, runnerPos, heading);
     }
@@ -252,16 +242,16 @@ public class SplineCreator : MonoBehaviour
 
     }
 
+    // Calculates the derivative of Catmull-Rom spline at t (for tangent / forward)
     public Vector3 CatmullRomTangent(Vector3 pPrev, Vector3 p0, Vector3 p1, Vector3 pNext, float t)
     {
         float t2 = t * t;
 
-        Vector3 tangent = (6 * t2 - 6 * t) * p0
-                        + (3 * t2 - 4 * t + 1) * pPrev
-                        + (-6 * t2 + 6 * t) * p1
-                        + (3 * t2 - 2 * t) * pNext;
-
-        return tangent;
+        return 0.5f * (
+            (-pPrev + p1) +
+            (4f * pPrev - 10f * p0 + 8f * p1 - 2f * pNext) * t +
+            (-3f * pPrev + 9f * p0 - 9f * p1 + 3f * pNext) * t2
+        );
 
     }
 
