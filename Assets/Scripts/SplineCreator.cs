@@ -181,10 +181,10 @@ public class SplineCreator : MonoBehaviour
         }
 
 
-        // Generate points on the curve between the current start and end
-        // Offset by 1 to prevent negative results from modulus
+        // Generate sample points on the curve between the current start and end
         for (int j = 0; j < numPoints; j++)
         {
+            // Negative mods returns negative in C#
             int prevNeighborIndex = Math.Abs((j - 1) % numPoints);
 
             Vector3 prevNeighbor = positions[prevNeighborIndex];
@@ -196,6 +196,8 @@ public class SplineCreator : MonoBehaviour
 
             float segmentArc = 0;
             // The generation of said point on curve
+            // Starting from 1 as we do not want to duplicate at control points
+            // (first control point is covered by end of last segment)
             for (float k = 1; k < samplesPerSegment + 1; k++)
             {
                 float segT = k / samplesPerSegment;
@@ -204,12 +206,15 @@ public class SplineCreator : MonoBehaviour
                 GameObject curveObject = Instantiate(linePrefab);
                 curveObject.transform.position = curvePoint;
 
+                // Calculate the total arc length of the segment
                 float distanceX = curvePoint.x - previousPoint.x;
                 float distanceY = curvePoint.z - previousPoint.z;
                 float arcLength = Mathf.Sqrt(distanceY * distanceY + distanceX * distanceX);
                 cumulativeArcLength += arcLength;
                 segmentArc += arcLength;
 
+                // Cache sample information in table to be accessed later  
+                // to map distance traveled to segment and segment progress (t)
                 int sampleIndex = j * samplesPerSegment + ((int)k - 1);
                 segmentSamples[sampleIndex] = new(cumulativeArcLength, j, segT, curvePoint);
                 Debug.Log(segmentSamples[sampleIndex]); 
