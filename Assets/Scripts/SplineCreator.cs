@@ -233,17 +233,13 @@ public class SplineCreator : MonoBehaviour
         float t2 = t * t;
         float t3 = t2 * t;
 
-        double x = 0.5 * (2 * p0[0] +
-                        (-pPrev[0] + p1[0]) * t +
-                        (2 * pPrev[0] - 5 * p0[0] + 4 * p1[0] - pNext[0]) * t2 +
-                        (-pPrev[0] + 3 * p0[0] - 3 * p1[0] + pNext[0]) * t3);
+        Vector3 point = 0.5f * (2 * p0 +
+                        (-pPrev + p1) * t +
+                        (2 * pPrev - 5 * p0 + 4 * p1 - pNext) * t2 +
+                        (-pPrev + 3 * p0 - 3 * p1 + pNext) * t3);
 
-        double y = 0.5 * (2 * p0[2] +
-                        (-pPrev[2] + p1[2]) * t +
-                        (2 * pPrev[2] - 5 * p0[2] + 4 * p1[2] - pNext[2]) * t2 +
-                        (-pPrev[2] + 3 * p0[2] - 3 * p1[2] + pNext[2]) * t3);
 
-        return new Vector3((float)x, 0, (float)y);
+        return point;
 
     }
 
