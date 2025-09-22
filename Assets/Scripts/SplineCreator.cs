@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Schema;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -53,7 +54,7 @@ public class SplineCreator : MonoBehaviour
     }
 
     // Get the racer's next position on the track based on its speed and current position
-    public RacerStatus AdvanceRacer(float alreadyCovered, float speed, float deltaTime)
+    public RacerStatus AdvanceRacer(float alreadyCovered, float speed, float deltaTime, float lateralOffset)
     {
         float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
 
@@ -74,7 +75,8 @@ public class SplineCreator : MonoBehaviour
         }
 
         // Covers start of the track
-        SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Length - 1].Position);
+        //SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Length - 1].Position);
+        SegmentSample firstSample = segmentSamples[segmentSamples.Length - 1];
         if (low > 0)
         {
             firstSample = segmentSamples[low - 1];
@@ -114,9 +116,18 @@ public class SplineCreator : MonoBehaviour
         Debug.Log("Final Position: " + runnerPos);
 
         Vector3 tangent = CatmullRomTangent(prev, first, second, next, interpolatedT).normalized;
+        Vector3 normal = Vector3.Cross(Vector3.up, tangent).normalized;
         Quaternion heading = Quaternion.LookRotation(tangent, Vector3.up);
 
-        return new RacerStatus(currentDistance, runnerPos, heading);
+        float kappa = Curvature(prev, first, second, next, interpolatedT);
+        float effectiveSpeed = speed * (1f - kappa * lateralOffset);
+
+        currentDistance = (currentDistance + (effectiveSpeed - speed) * deltaTime) % cumulativeArcLength;
+
+        runnerPos += normal * lateralOffset;
+
+
+        return new RacerStatus(currentDistance, runnerPos, tangent, normal, heading);
     }
 
     // Generates a non-looping spline
@@ -254,6 +265,27 @@ public class SplineCreator : MonoBehaviour
             (-3f * pPrev + 9f * p0 - 9f * p1 + 3f * pNext) * t2
         );
 
+    }
+
+
+    public Vector3 CatmullRomSecondDerivative(Vector3 pPrev, Vector3 p0, Vector3 p1, Vector3 pNext, float t)
+    {
+        return 0.5f * (
+            (4f * pPrev - 10f * p0 + 8f * p1 - 2f * pNext) +
+            (-6f * pPrev + 18f * p0 - 18f * p1 + 6f * pNext) * t
+        );
+    }
+
+    public float Curvature(Vector3 pPrev, Vector3 p0, Vector3 p1, Vector3 pNext, float t)
+    {
+        Vector3 d1 = CatmullRomTangent(pPrev, p0, p1, pNext, t);
+        Vector2 d2 = CatmullRomSecondDerivative(pPrev, p0, p1, pNext, t);
+
+        float crossMag = Vector3.Cross(d1, d2).magnitude;
+        float denominator = Mathf.Pow(d1.magnitude, 3);
+
+        if (denominator < 1e-6f) return 0f;
+        return crossMag / denominator;
     }
 
     // Generates the mirrored position of a neighboring point across a point

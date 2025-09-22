@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 // A race with racers that are running on a track
@@ -9,16 +10,29 @@ public class Race : MonoBehaviour
 
     public SplineCreator splineCreator;
 
+    public float[] targetRacerOffset;
+
+    private float[] racerOffset;
+
+    public float laneSize = 0.0f;
+
     private float[] racerDistance;
 
     // Start is called before the first frame update
     void Start()
     {
-        racerDistance = new float[racerList.Count];
-        //SplineCreator.RacerStatus startingStatus = splineCreator.AdvanceRacer(0f, 0f, 0f); 
-        foreach (Racer r in racerList)
-        {
+        int racers = racerList.Count;
 
+
+        racerDistance = new float[racers];
+        racerOffset = new float[racers];
+        targetRacerOffset = new float[racers];
+        //SplineCreator.RacerStatus startingStatus = splineCreator.AdvanceRacer(0f, 0f, 0f); 
+
+        for (int i = 0; i < racers; i++)
+        {
+            racerOffset[i] = i - 1;
+            targetRacerOffset[i] = i - 1;
         }
     }
 
@@ -29,11 +43,19 @@ public class Race : MonoBehaviour
         for (int i = 0; i < racers; i++)
         {
             Racer r = racerList[i];
-         
-            RacerStatus newRacerStatus = splineCreator.AdvanceRacer(racerDistance[i], r.runningSpeed, Time.deltaTime);
+            float oldOffset = racerOffset[i];
 
-            r.transform.position = newRacerStatus.position;
+            racerOffset[i] = Mathf.MoveTowards(racerOffset[i], targetRacerOffset[i], r.lateralMoveSpeed * Time.deltaTime);
+            float lateralVel = (racerOffset[i] - oldOffset) / Time.deltaTime;
+            float forwardSpeed = Mathf.Sqrt(Mathf.Max(0f, r.runningSpeed * r.runningSpeed - lateralVel * lateralVel));
+
+            RacerStatus newRacerStatus = splineCreator.AdvanceRacer(racerDistance[i], forwardSpeed, Time.deltaTime, racerOffset[i]);
+            Vector3 newPosition = newRacerStatus.position;
+
+
+            r.transform.position = newPosition;
             r.transform.rotation = newRacerStatus.heading;
+
 
             racerDistance[i] = newRacerStatus.distanceCovered;
         }
