@@ -27,7 +27,7 @@ public class SplineCreator : MonoBehaviour
 
     private Vector3[] positions;
 
-    private SegmentSample[] segmentSamples;
+    private List<SegmentSample> segmentSamples = new List<SegmentSample>();
 
 
 
@@ -59,7 +59,7 @@ public class SplineCreator : MonoBehaviour
         float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
 
         // Binary search for closest two samples
-        int low = 0, high = segmentSamples.Length - 1;
+        int low = 0, high = segmentSamples.Count - 1;
         while (low < high)
         {
             int mid = (low + high) / 2;
@@ -75,8 +75,8 @@ public class SplineCreator : MonoBehaviour
         }
 
         // Covers start of the track
-        //SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Length - 1].Position);
-        SegmentSample firstSample = segmentSamples[segmentSamples.Length - 1];
+        SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Count - 1].Position);
+        //SegmentSample firstSample = segmentSamples[segmentSamples.Count - 1];
         if (low > 0)
         {
             firstSample = segmentSamples[low - 1];
@@ -96,12 +96,13 @@ public class SplineCreator : MonoBehaviour
         float firstT = firstSample.SegmentT % 1;
         float interpolatedT = firstT + scaler * (secondSample.SegmentT - firstT);
 
-        int numPoints = positions.Length;
+        int numPoints = points.Length;
 
         // Using t and the current curve's points, we determine the position, tangent, and normal
         // First and second should always be in the same curve; however
         // second segment index is used for same reason as last comment
-        int prevIndex = Math.Abs((secondSample.SegmentIndex - 1) % numPoints);
+        //int prevIndex = Math.Abs((secondSample.SegmentIndex - 1) % numPoints);
+        int prevIndex = secondSample.SegmentIndex == 0 ? numPoints - 1 : secondSample.SegmentIndex - 1;
         Vector3 prev = positions[prevIndex];
         Vector3 first = positions[(secondSample.SegmentIndex) % numPoints];
         Vector3 second = positions[(secondSample.SegmentIndex + 1) % numPoints];
@@ -181,8 +182,6 @@ public class SplineCreator : MonoBehaviour
     // Generates a looping spline
     public void DrawLoopingSpline()
     {
-        segmentSamples = new SegmentSample[points.Length * samplesPerSegment];
-
         // Get all control point locations
         int numPoints = points.Length;
         positions = new Vector3[numPoints];
@@ -196,8 +195,9 @@ public class SplineCreator : MonoBehaviour
         for (int j = 0; j < numPoints; j++)
         {
             // Negative mods returns negative in C#
-            int prevNeighborIndex = Math.Abs((j - 1) % numPoints);
+            //int prevNeighborIndex = Math.Abs((j - 1) % numPoints);
 
+            int prevNeighborIndex = j == 0 ? numPoints - 1 : j - 1 % numPoints;
             Vector3 prevNeighbor = positions[prevNeighborIndex];
             Vector3 start = positions[j % numPoints];
             Vector3 end = positions[(j + 1) % numPoints];
@@ -227,7 +227,7 @@ public class SplineCreator : MonoBehaviour
                 // Cache sample information in table to be accessed later  
                 // to map distance traveled to segment and segment progress (t)
                 int sampleIndex = j * samplesPerSegment + ((int)k - 1);
-                segmentSamples[sampleIndex] = new(cumulativeArcLength, j, segT, curvePoint);
+                segmentSamples.Add(new(cumulativeArcLength, j, segT, curvePoint));
                 Debug.Log(segmentSamples[sampleIndex]); 
 
                 previousPoint = curvePoint;

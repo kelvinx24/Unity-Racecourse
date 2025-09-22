@@ -684,7 +684,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   racerName: McQueen
-  runningSpeed: 10
+  runningSpeed: 5
+  lateralMoveSpeed: 3
 --- !u!1 &219745555 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
@@ -703,7 +704,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   racerName: McQueen
-  runningSpeed: 10
+  runningSpeed: 5
+  lateralMoveSpeed: 3
 --- !u!1 &237723731
 GameObject:
   m_ObjectHideFlags: 0
@@ -996,7 +998,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   racerName: McQueen
-  runningSpeed: 10
+  runningSpeed: 5
+  lateralMoveSpeed: 3
 --- !u!1 &507100684
 GameObject:
   m_ObjectHideFlags: 0
@@ -42333,7 +42336,7 @@ MonoBehaviour:
   - {fileID: 219745556}
   - {fileID: 392064623}
   splineCreator: {fileID: 2022949637}
-  racerOffset: []
+  targetRacerOffset: []
   laneSize: 3
 --- !u!43 &2046109343
 Mesh:
