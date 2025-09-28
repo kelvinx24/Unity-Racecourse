@@ -5,6 +5,7 @@ using System.Xml.Schema;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.ParticleSystem;
 
 /**
  * Creates a spline or looping spline using Catmull Rom
@@ -12,7 +13,7 @@ using UnityEngine.UIElements;
 
 public class SplineCreator : MonoBehaviour
 {
-    private record SegmentSample(float Cumulative, int SegmentIndex, float SegmentT, Vector3 Position);
+    private record SegmentSample(float Cumulative, int SegmentIndex, float SegmentT, Vector3 Position, Vector3 tangent, Vector3 normal, GameObject obj);
 
     public Transform[] points;
 
@@ -29,6 +30,11 @@ public class SplineCreator : MonoBehaviour
 
     private List<SegmentSample> segmentSamples = new List<SegmentSample>();
 
+    private List<SegmentSample> offsetSegmentSamples = new List<SegmentSample>();
+
+    private Vector3[] offsetPositions;
+
+    private float offsetCumulative = 0;
 
 
     // Start is called before the first frame update
@@ -38,25 +44,28 @@ public class SplineCreator : MonoBehaviour
         {
 
             DrawLoopingSpline();
+            DrawOffsetSpline(10);
         }
         else
         {
             DrawSpline();
         }
 
-        Debug.Log("Arc Length: " + cumulativeArcLength);
+        //Debug.Log("Arc Length: " + cumulativeArcLength);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        //ClearSpline();
+        //DrawLoopingSpline();
     }
 
     // Get the racer's next position on the track based on its speed and current position
     public RacerStatus AdvanceRacer(float alreadyCovered, float speed, float deltaTime, float lateralOffset)
     {
-        float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
+        //float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
+        float currentDistance = alreadyCovered;
 
         // Binary search for closest two samples
         int low = 0, high = segmentSamples.Count - 1;
@@ -75,7 +84,7 @@ public class SplineCreator : MonoBehaviour
         }
 
         // Covers start of the track
-        SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Count - 1].Position);
+        SegmentSample firstSample = new SegmentSample(0f, 0, 0f, segmentSamples[segmentSamples.Count - 1].Position, Vector3.zero, Vector3.zero, null);
         //SegmentSample firstSample = segmentSamples[segmentSamples.Count - 1];
         if (low > 0)
         {
@@ -84,9 +93,9 @@ public class SplineCreator : MonoBehaviour
 
         SegmentSample secondSample = segmentSamples[low];
 
-        Debug.Log("Cumulative Distance: " + currentDistance);
-        Debug.Log("First End: " + firstSample);
-        Debug.Log("Second End: " + secondSample);
+        //Debug.Log("Cumulative Distance: " + currentDistance);
+        //Debug.Log("First End: " + firstSample);
+        //Debug.Log("Second End: " + secondSample);
 
         // Calculates progress between the two samples to get t for current segment
         float denominator = secondSample.Cumulative - firstSample.Cumulative;
@@ -109,24 +118,122 @@ public class SplineCreator : MonoBehaviour
         Vector3 next = positions[(secondSample.SegmentIndex + 2) % numPoints];
 
         Vector3 runnerPos = CatmullRomPoint(prev, first, second, next, interpolatedT);
-        Debug.Log("Prev: " + prev);
-        Debug.Log("First: " + first);
-        Debug.Log("Second: " + second);
-        Debug.Log("Next: " + next);
-        Debug.Log("T: " + interpolatedT);
-        Debug.Log("Final Position: " + runnerPos);
+        //Debug.Log("Prev: " + prev);
+        //Debug.Log("First: " + first);
+        //Debug.Log("Second: " + second);
+        //Debug.Log("Next: " + next);
+        //Debug.Log("T: " + interpolatedT);
+        //Debug.Log("Final Position: " + runnerPos);
 
         Vector3 tangent = CatmullRomTangent(prev, first, second, next, interpolatedT).normalized;
         Vector3 normal = Vector3.Cross(Vector3.up, tangent).normalized;
         Quaternion heading = Quaternion.LookRotation(tangent, Vector3.up);
 
         float kappa = Curvature(prev, first, second, next, interpolatedT);
-        float effectiveSpeed = speed * (1f - kappa * lateralOffset);
+        kappa = Mathf.Clamp(kappa, 0f, 1.0f);
 
-        currentDistance = (currentDistance + (effectiveSpeed - speed) * deltaTime) % cumulativeArcLength;
+        float denomFactor = 1f + kappa * lateralOffset;
+        denomFactor = Mathf.Max(denomFactor, 1e-3f); // avoid divide-by-zero
+
+        float arcFactor = 1f / denomFactor;
+        float deltaS = speed * deltaTime * arcFactor;
+        Debug.Log("Curvature : " + kappa + "\n"
+            + "Arc: " + arcFactor + "\n"
+            + "Speed: " + speed + "\n"
+            + "Delta Speed: " + deltaS);
+
+        currentDistance = (currentDistance + deltaS) % cumulativeArcLength;
+        if (currentDistance < 0f) currentDistance += cumulativeArcLength;
 
         runnerPos += normal * lateralOffset;
 
+
+        return new RacerStatus(currentDistance, runnerPos, tangent, normal, heading);
+    }
+
+    // Get the racer's next position on the track based on its speed and current position
+    public RacerStatus AdvanceRacerOffset(float alreadyCovered, float speed, float deltaTime, float lateralOffset)
+    {
+        //float currentDistance = (alreadyCovered + speed * deltaTime) % cumulativeArcLength;
+        float currentDistance = alreadyCovered;
+
+        // Binary search for closest two samples
+        int low = 0, high = offsetSegmentSamples.Count - 1;
+        while (low < high)
+        {
+            int mid = (low + high) / 2;
+            if (offsetSegmentSamples[mid].Cumulative < currentDistance)
+            {
+                low = mid + 1;
+            }
+            else
+            {
+                high = mid;
+            }
+
+        }
+
+        // Covers start of the track
+        SegmentSample firstSample = new SegmentSample(0f, 0, 0f, offsetSegmentSamples[offsetSegmentSamples.Count - 1].Position, Vector3.zero, Vector3.zero, null);
+        //SegmentSample firstSample = segmentSamples[segmentSamples.Count - 1];
+        if (low > 0)
+        {
+            firstSample = offsetSegmentSamples[low - 1];
+        }
+
+        SegmentSample secondSample = offsetSegmentSamples[low];
+
+        //Debug.Log("Cumulative Distance: " + currentDistance);
+        //Debug.Log("First End: " + firstSample);
+        //Debug.Log("Second End: " + secondSample);
+
+        // Calculates progress between the two samples to get t for current segment
+        float denominator = secondSample.Cumulative - firstSample.Cumulative;
+        float scaler = denominator == 0 ? 0f : (currentDistance - firstSample.Cumulative) / denominator;
+        scaler = Mathf.Clamp01(scaler);
+        // Since we do not include start of segments, we convert the end of the previous segment if necessary
+        float firstT = firstSample.SegmentT % 1;
+        float interpolatedT = firstT + scaler * (secondSample.SegmentT - firstT);
+
+        int numPoints = offsetPositions.Length;
+
+        // Using t and the current curve's points, we determine the position, tangent, and normal
+        // First and second should always be in the same curve; however
+        // second segment index is used for same reason as last comment
+        //int prevIndex = Math.Abs((secondSample.SegmentIndex - 1) % numPoints);
+        int prevIndex = secondSample.SegmentIndex == 0 ? numPoints - 1 : secondSample.SegmentIndex - 1;
+        Vector3 prev = offsetPositions[prevIndex];
+        Vector3 first = offsetPositions[(secondSample.SegmentIndex) % numPoints];
+        Vector3 second = offsetPositions[(secondSample.SegmentIndex + 1) % numPoints];
+        Vector3 next = offsetPositions[(secondSample.SegmentIndex + 2) % numPoints];
+
+        Vector3 runnerPos = CatmullRomPoint(prev, first, second, next, interpolatedT);
+        //Debug.Log("Prev: " + prev);
+        //Debug.Log("First: " + first);
+        //Debug.Log("Second: " + second);
+        //Debug.Log("Next: " + next);
+        //Debug.Log("T: " + interpolatedT);
+        //Debug.Log("Final Position: " + runnerPos);
+
+        Vector3 tangent = CatmullRomTangent(prev, first, second, next, interpolatedT).normalized;
+        Vector3 normal = Vector3.Cross(Vector3.up, tangent).normalized;
+        Quaternion heading = Quaternion.LookRotation(tangent, Vector3.up);
+
+        float kappa = Curvature(prev, first, second, next, interpolatedT);
+        kappa = Mathf.Clamp(kappa, 0f, 1.0f);
+
+        float denomFactor = 1f;
+        denomFactor = Mathf.Max(denomFactor, 1e-3f); // avoid divide-by-zero
+
+        float arcFactor = 1f / denomFactor;
+        float deltaS = speed * deltaTime * arcFactor;
+        //Debug.Log("Curvature : " + kappa + "\n"
+        //    + "Arc: " + arcFactor + "\n"
+        //    + "Speed: " + speed + "\n"
+        //    + "Delta Speed: " + deltaS);
+
+        currentDistance = (currentDistance + deltaS) % offsetCumulative;
+        if (currentDistance < 0f) currentDistance += offsetCumulative;
 
         return new RacerStatus(currentDistance, runnerPos, tangent, normal, heading);
     }
@@ -205,14 +312,20 @@ public class SplineCreator : MonoBehaviour
 
             Vector3 previousPoint = CatmullRomPoint(prevNeighbor, start, end, endNeighbor, 0f);
 
+
+
             float segmentArc = 0;
             // The generation of said point on curve
+
             // Starting from 1 as we do not want to duplicate at control points
             // (first control point is covered by end of last segment)
             for (float k = 1; k < samplesPerSegment + 1; k++)
             {
                 float segT = k / samplesPerSegment;
                 Vector3 curvePoint = CatmullRomPoint(prevNeighbor, start, end, endNeighbor, segT);
+                Vector3 tangent = CatmullRomTangent(prevNeighbor, start, end, endNeighbor, segT).normalized;
+                Vector3 normal = Vector3.Cross(Vector3.up, tangent).normalized;
+
 
                 GameObject curveObject = Instantiate(linePrefab);
                 curveObject.transform.position = curvePoint;
@@ -227,13 +340,68 @@ public class SplineCreator : MonoBehaviour
                 // Cache sample information in table to be accessed later  
                 // to map distance traveled to segment and segment progress (t)
                 int sampleIndex = j * samplesPerSegment + ((int)k - 1);
-                segmentSamples.Add(new(cumulativeArcLength, j, segT, curvePoint));
-                Debug.Log(segmentSamples[sampleIndex]); 
+                segmentSamples.Add(new(cumulativeArcLength, j, segT, curvePoint, tangent, normal, curveObject));
+                //Debug.Log(segmentSamples[sampleIndex]); 
 
                 previousPoint = curvePoint;
             }
 
-            Debug.Log("Segment Arc Length: " + segmentArc);
+            //Debug.Log("Segment Arc Length: " + segmentArc);
+        }
+    }
+
+    private void ClearSpline()
+    {
+        foreach (var segment in segmentSamples)
+        {
+            Destroy(segment.obj);
+        }
+        segmentSamples.Clear();
+    }
+
+    private void DrawOffsetSpline(float offset)
+    {
+        offsetPositions = new Vector3[positions.Length];
+        
+        SegmentSample previous = segmentSamples[segmentSamples.Count - 1];
+
+        for (int i = 0; i < segmentSamples.Count; i++)
+        {
+            SegmentSample ss = segmentSamples[i];
+
+            Vector3 offsetPosition = ss.Position + ss.normal * offset;
+            if (ss.SegmentT == 1)
+            {
+                int pointIndex = (ss.SegmentIndex + 1) % offsetPositions.Length;
+                Debug.Log(pointIndex);
+                offsetPositions[pointIndex] = offsetPosition;
+            }
+
+            GameObject offsetObj = Instantiate(linePrefab, offsetPosition, Quaternion.identity);
+
+            if (i == 0)
+            {
+                Vector3 cyclePointOffset = previous.Position + previous.normal * offset;
+
+                float difference = (offsetPosition - cyclePointOffset).magnitude;
+                offsetCumulative += difference;
+                SegmentSample offsetSample = new SegmentSample(offsetCumulative, 0, ss.SegmentT, offsetPosition, ss.tangent, ss.normal, offsetObj);
+                offsetSegmentSamples.Add(offsetSample);
+                previous = offsetSample;
+                //Debug.Log(offsetSample.ToString());
+
+
+            }
+            else
+            {
+                float difference = (offsetPosition - previous.Position).magnitude;
+                offsetCumulative += difference;
+
+                SegmentSample offsetSample = new SegmentSample(offsetCumulative, ss.SegmentIndex, ss.SegmentT, offsetPosition, ss.tangent, ss.normal, offsetObj);
+                offsetSegmentSamples.Add(offsetSample);
+                previous = offsetSample;
+                Debug.Log(offsetSample.ToString());
+            }
         }
     }
 

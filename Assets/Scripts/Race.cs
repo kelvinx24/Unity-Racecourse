@@ -31,8 +31,8 @@ public class Race : MonoBehaviour
 
         for (int i = 0; i < racers; i++)
         {
-            racerOffset[i] = i - 1;
-            targetRacerOffset[i] = i - 1;
+            racerOffset[i] = i;
+            targetRacerOffset[i] = i;
         }
     }
 
@@ -49,7 +49,7 @@ public class Race : MonoBehaviour
             float lateralVel = (racerOffset[i] - oldOffset) / Time.deltaTime;
             float forwardSpeed = Mathf.Sqrt(Mathf.Max(0f, r.runningSpeed * r.runningSpeed - lateralVel * lateralVel));
 
-            RacerStatus newRacerStatus = splineCreator.AdvanceRacer(racerDistance[i], forwardSpeed, Time.deltaTime, racerOffset[i]);
+            RacerStatus newRacerStatus = splineCreator.AdvanceRacerOffset(racerDistance[i], forwardSpeed, Time.deltaTime, racerOffset[i]);
             Vector3 newPosition = newRacerStatus.position;
 
 
