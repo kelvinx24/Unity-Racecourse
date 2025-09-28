@@ -373,35 +373,70 @@ public class SplineCreator : MonoBehaviour
             if (ss.SegmentT == 1)
             {
                 int pointIndex = (ss.SegmentIndex + 1) % offsetPositions.Length;
-                Debug.Log(pointIndex);
                 offsetPositions[pointIndex] = offsetPosition;
             }
 
-            GameObject offsetObj = Instantiate(linePrefab, offsetPosition, Quaternion.identity);
+         
+        }
 
-            if (i == 0)
+        DrawLoopingSplineOffset();
+    }
+
+    public void DrawLoopingSplineOffset()
+    {
+        // Get all control point locations
+        int numPoints = offsetPositions.Length;
+
+
+        // Generate sample points on the curve between the current start and end
+        for (int j = 0; j < numPoints; j++)
+        {
+            // Negative mods returns negative in C#
+            //int prevNeighborIndex = Math.Abs((j - 1) % numPoints);
+
+            int prevNeighborIndex = j == 0 ? numPoints - 1 : j - 1 % numPoints;
+            Vector3 prevNeighbor = offsetPositions[prevNeighborIndex];
+            Vector3 start = offsetPositions[j % numPoints];
+            Vector3 end = offsetPositions[(j + 1) % numPoints];
+            Vector3 endNeighbor = offsetPositions[(j + 2) % numPoints];
+
+            Vector3 previousPoint = CatmullRomPoint(prevNeighbor, start, end, endNeighbor, 0f);
+
+
+
+            float segmentArc = 0;
+            // The generation of said point on curve
+
+            // Starting from 1 as we do not want to duplicate at control points
+            // (first control point is covered by end of last segment)
+            for (float k = 1; k < samplesPerSegment + 1; k++)
             {
-                Vector3 cyclePointOffset = previous.Position + previous.normal * offset;
-
-                float difference = (offsetPosition - cyclePointOffset).magnitude;
-                offsetCumulative += difference;
-                SegmentSample offsetSample = new SegmentSample(offsetCumulative, 0, ss.SegmentT, offsetPosition, ss.tangent, ss.normal, offsetObj);
-                offsetSegmentSamples.Add(offsetSample);
-                previous = offsetSample;
-                //Debug.Log(offsetSample.ToString());
+                float segT = k / samplesPerSegment;
+                Vector3 curvePoint = CatmullRomPoint(prevNeighbor, start, end, endNeighbor, segT);
+                Vector3 tangent = CatmullRomTangent(prevNeighbor, start, end, endNeighbor, segT).normalized;
+                Vector3 normal = Vector3.Cross(Vector3.up, tangent).normalized;
 
 
+                GameObject curveObject = Instantiate(linePrefab);
+                curveObject.transform.position = curvePoint;
+
+                // Calculate the total arc length of the segment
+                float distanceX = curvePoint.x - previousPoint.x;
+                float distanceY = curvePoint.z - previousPoint.z;
+                float arcLength = Mathf.Sqrt(distanceY * distanceY + distanceX * distanceX);
+                offsetCumulative += arcLength;
+                segmentArc += arcLength;
+
+                // Cache sample information in table to be accessed later  
+                // to map distance traveled to segment and segment progress (t)
+                int sampleIndex = j * samplesPerSegment + ((int)k - 1);
+                offsetSegmentSamples.Add(new(offsetCumulative, j, segT, curvePoint, tangent, normal, curveObject));
+                //Debug.Log(segmentSamples[sampleIndex]); 
+
+                previousPoint = curvePoint;
             }
-            else
-            {
-                float difference = (offsetPosition - previous.Position).magnitude;
-                offsetCumulative += difference;
 
-                SegmentSample offsetSample = new SegmentSample(offsetCumulative, ss.SegmentIndex, ss.SegmentT, offsetPosition, ss.tangent, ss.normal, offsetObj);
-                offsetSegmentSamples.Add(offsetSample);
-                previous = offsetSample;
-                Debug.Log(offsetSample.ToString());
-            }
+            //Debug.Log("Segment Arc Length: " + segmentArc);
         }
     }
 
