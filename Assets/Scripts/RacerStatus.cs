@@ -5,20 +5,26 @@ using UnityEngine;
 // The current status of a racer in a race
 public struct RacerStatus
 {
-    public float distanceCovered;
+    public SplinePath currentPath;
+
     public Vector3 position;
     public Vector3 tangent;
     public Vector3 normal;
 
     public Quaternion heading;
+    public float progress;
 
-    public RacerStatus(float distanceCovered, Vector3 position, Vector3 tangent, Vector3 normal, Quaternion heading)
+    public RacerStatus(SplinePath path, Vector3 position, Vector3 tangent, Vector3 normal, Quaternion heading)
     {
-        this.distanceCovered = distanceCovered;
+        this.currentPath = path;
         this.position = position;
         this.tangent = tangent;
         this.normal = normal;
         this.heading = heading;
+
+        this.progress = 0;
+
+
     }
 }
 

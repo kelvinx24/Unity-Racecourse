@@ -8,8 +8,6 @@ public class Race : MonoBehaviour
 {
     public List<Racer> racerList = new List<Racer>();
 
-    public SplineCreator splineCreator;
-
     public float[] targetRacerOffset;
 
     private float[] racerOffset;
@@ -49,15 +47,6 @@ public class Race : MonoBehaviour
             float lateralVel = (racerOffset[i] - oldOffset) / Time.deltaTime;
             float forwardSpeed = Mathf.Sqrt(Mathf.Max(0f, r.runningSpeed * r.runningSpeed - lateralVel * lateralVel));
 
-            RacerStatus newRacerStatus = splineCreator.AdvanceRacerOffset(racerDistance[i], forwardSpeed, Time.deltaTime, racerOffset[i]);
-            Vector3 newPosition = newRacerStatus.position;
-
-
-            r.transform.position = newPosition;
-            r.transform.rotation = newRacerStatus.heading;
-
-
-            racerDistance[i] = newRacerStatus.distanceCovered;
         }
     }
 

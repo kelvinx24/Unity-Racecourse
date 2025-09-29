@@ -2298,7 +2298,7 @@ Transform:
   m_GameObject: {fileID: 1125632700}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 18.7, y: 3, z: -33.13}
+  m_LocalPosition: {x: 18.7, y: 3, z: -29.53}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -37585,7 +37585,7 @@ Transform:
   m_GameObject: {fileID: 1437758816}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 18.7, y: 3, z: -40.19}
+  m_LocalPosition: {x: 18.7, y: 3, z: -41.94}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -37867,8 +37867,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1597473008}
-  - component: {fileID: 1597473007}
   - component: {fileID: 1597473006}
+  - component: {fileID: 1597473009}
   m_Layer: 0
   m_Name: RaceManager (1)
   m_TagString: Untagged
@@ -37883,46 +37883,15 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1597473005}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3d5fac92fff767b45846b01fd093988c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   racerList:
   - {fileID: 169764524}
-  splineCreator: {fileID: 1597473007}
   targetRacerOffset: []
   laneSize: 3
---- !u!114 &1597473007
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1597473005}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b139e58f8e215c34ca63b8a9229e4168, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  points:
-  - {fileID: 1196065534}
-  - {fileID: 564657714}
-  - {fileID: 1172840559}
-  - {fileID: 1552357487}
-  - {fileID: 786831648}
-  - {fileID: 841580078}
-  - {fileID: 266123343}
-  - {fileID: 237723732}
-  - {fileID: 1277148096}
-  - {fileID: 622540924}
-  - {fileID: 137346209}
-  - {fileID: 749945049}
-  - {fileID: 1401975576}
-  - {fileID: 92610179}
-  linePrefab: {fileID: 5746086860954144375, guid: 35b0cee8a519e5a498345841d755af09, type: 3}
-  samplesPerSegment: 50
-  looping: 1
 --- !u!4 &1597473008
 Transform:
   m_ObjectHideFlags: 0
@@ -37938,6 +37907,38 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1597473009
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1597473005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1dfbbc787c3c404a9a8e583b4636927, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controlPoints:
+  - {fileID: 1196065534}
+  - {fileID: 564657714}
+  - {fileID: 1172840559}
+  - {fileID: 1552357487}
+  - {fileID: 786831648}
+  - {fileID: 841580078}
+  - {fileID: 266123343}
+  - {fileID: 237723732}
+  - {fileID: 1277148096}
+  - {fileID: 622540924}
+  - {fileID: 137346209}
+  - {fileID: 749945049}
+  - {fileID: 1401975576}
+  - {fileID: 92610179}
+  - {fileID: 1437758817}
+  - {fileID: 1125632704}
+  laneSize: 10
+  splinePrefab: {fileID: 5746086860954144375, guid: 35b0cee8a519e5a498345841d755af09, type: 3}
+  samplesPerSegment: 100
 --- !u!1 &1666443077
 GameObject:
   m_ObjectHideFlags: 0
@@ -42555,7 +42556,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2022949638}
-  - component: {fileID: 2022949637}
   - component: {fileID: 2022949639}
   m_Layer: 0
   m_Name: RaceManager
@@ -42564,37 +42564,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
---- !u!114 &2022949637
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2022949636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b139e58f8e215c34ca63b8a9229e4168, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  points:
-  - {fileID: 1196065534}
-  - {fileID: 564657714}
-  - {fileID: 1172840559}
-  - {fileID: 1552357487}
-  - {fileID: 786831648}
-  - {fileID: 841580078}
-  - {fileID: 266123343}
-  - {fileID: 237723732}
-  - {fileID: 1277148096}
-  - {fileID: 622540924}
-  - {fileID: 137346209}
-  - {fileID: 749945049}
-  - {fileID: 1401975576}
-  - {fileID: 92610179}
-  - {fileID: 1437758817}
-  linePrefab: {fileID: 5746086860954144375, guid: 35b0cee8a519e5a498345841d755af09, type: 3}
-  samplesPerSegment: 50
-  looping: 1
 --- !u!4 &2022949638
 Transform:
   m_ObjectHideFlags: 0
@@ -42626,7 +42595,6 @@ MonoBehaviour:
   - {fileID: 169764524}
   - {fileID: 219745556}
   - {fileID: 392064623}
-  splineCreator: {fileID: 2022949637}
   targetRacerOffset: []
   laneSize: 3
 --- !u!43 &2046109343
