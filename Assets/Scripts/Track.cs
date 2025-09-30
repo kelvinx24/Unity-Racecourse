@@ -7,7 +7,7 @@ public class Track : MonoBehaviour
 {
     public List<Transform> controlPoints = new List<Transform>();
 
-    public float laneSize;
+    public float trackSize;
 
     public GameObject splinePrefab;
 
@@ -61,7 +61,7 @@ public class Track : MonoBehaviour
         for (int i = 0; i < controlPointSamples.Count;i++)
         {
             Vector3 pointNormal = controlPointSamples[i].Normal;
-            Vector3 offsetPosition = controlPointSamples[i].Position + pointNormal * laneSize;
+            Vector3 offsetPosition = controlPointSamples[i].Position + pointNormal * trackSize;
             outerControlPoints.Add(offsetPosition);
         }
 
@@ -86,4 +86,8 @@ public class Track : MonoBehaviour
             innerSplineObjects.Add(gameObject);
         }
     }
+
+    public SplinePath GetInnerSpline() { return innerSpline; }
+
+    public SplinePath GetOuterSpline() { return outerSpline; }
 }

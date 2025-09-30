@@ -27,4 +27,5 @@ public class SplinePath
     }
 
     public List<SegmentSample> GetSamplesTable() { return samplesTable; }
+
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -8,50 +9,78 @@ public class Race : MonoBehaviour
 {
     public List<Racer> racerList = new List<Racer>();
 
-    public float[] targetRacerOffset;
+    public Track track;
 
-    private float[] racerOffset;
-
-    public float laneSize = 0.0f;
-
-    private float[] racerDistance;
+    private Dictionary<Racer, RacerStatus> racersStatus = new Dictionary<Racer, RacerStatus>();
 
     // Start is called before the first frame update
     void Start()
     {
-        int racers = racerList.Count;
-
-
-        racerDistance = new float[racers];
-        racerOffset = new float[racers];
-        targetRacerOffset = new float[racers];
-        //SplineCreator.RacerStatus startingStatus = splineCreator.AdvanceRacer(0f, 0f, 0f); 
-
-        for (int i = 0; i < racers; i++)
-        {
-            racerOffset[i] = i;
-            targetRacerOffset[i] = i;
-        }
+       InitiateRacers();
     }
 
     // Update is called once per frame
     void Update()
     {
-        int racers = racerList.Count;
-        for (int i = 0; i < racers; i++)
+        foreach (KeyValuePair<Racer, RacerStatus> entry in racersStatus)
         {
-            Racer r = racerList[i];
-            float oldOffset = racerOffset[i];
+            Racer racer = entry.Key;
+            RacerStatus status = entry.Value;
 
-            racerOffset[i] = Mathf.MoveTowards(racerOffset[i], targetRacerOffset[i], r.lateralMoveSpeed * Time.deltaTime);
-            float lateralVel = (racerOffset[i] - oldOffset) / Time.deltaTime;
-            float forwardSpeed = Mathf.Sqrt(Mathf.Max(0f, r.runningSpeed * r.runningSpeed - lateralVel * lateralVel));
-
+            racer.transform.position = status.position;
+            racer.transform.rotation = status.heading;
         }
     }
 
     private void UpdateRacerStatus(ref RacerStatus racerStatus)
     {
 
+    }
+
+    private void InitiateRacers()
+    {
+        List<SegmentSample> innerControlSamples = track.GetInnerSpline().GetControlPointSamples();
+        SegmentSample startPoint = innerControlSamples[innerControlSamples.Count - 1];
+
+        float trackWidth = track.trackSize;
+        int numRacers = racerList.Count;
+        float laneWidth = trackWidth / (float) numRacers;
+
+        for (int i = 0; i < numRacers + 0; i++)
+        {
+            // Adjust racer spline path according to starting position
+            List<Vector3> adjustedControlPoints = new List<Vector3>();
+            for (int j = 0; j < innerControlSamples.Count; j++)
+            {
+                float offset = (i + 0.5f) * laneWidth;
+                SegmentSample controlPoint = innerControlSamples[j];
+                Vector3 adjustedPoint = controlPoint.Position + controlPoint.Normal * offset;
+                adjustedControlPoints.Add(adjustedPoint);
+            }
+
+            // Initiate RacerStatus
+            SplinePath racerPath = SplineCreator.CreateSplinePath(adjustedControlPoints, track.samplesPerSegment);
+            List<SegmentSample> racerPathControlSamples = racerPath.GetControlPointSamples();
+            SegmentSample startSample = racerPathControlSamples[racerPathControlSamples.Count - 1];
+
+            Quaternion heading = Quaternion.LookRotation(startSample.Tangent, Vector3.up);
+            RacerStatus racerStatus = new RacerStatus(racerPath, startSample.Position, startSample.Tangent, startSample.Normal, heading);
+            racersStatus.Add(racerList[i], racerStatus);
+        }
+        
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+
+        foreach (RacerStatus racerStatus in racersStatus.Values)
+        {
+            foreach (SegmentSample s in racerStatus.currentPath.GetSamplesTable())
+            {
+                Gizmos.DrawWireSphere(s.Position, 1);
+            }
+        }
     }
 }
