@@ -1,8 +1,9 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
 
 // A race with racers that are running on a track
 public class Race : MonoBehaviour
@@ -27,10 +28,40 @@ public class Race : MonoBehaviour
             Racer racer = entry.Key;
             RacerStatus status = entry.Value;
 
-            racer.transform.position = status.position;
-            racer.transform.rotation = status.heading;
+            // Step 1: predict forward motion
+            Vector3 forwardMove = status.tangent * racer.runningSpeed * Time.deltaTime;
+            Vector3 predicted = status.position + forwardMove;
+
+            // Step 2: snap predicted point back onto spline
+            Vector3 closestPoint = status.currentPath.ClosestPointPosition(predicted, status.tangent);
+            Vector3 closestTan = status.currentPath.ClosestPointTangent(predicted, status.tangent).normalized;
+
+            // Optional: if you have a spline normal method
+            Vector3 closestNormal = Vector3.Cross(Vector3.up, closestTan).normalized;
+
+            racer.GetComponent<RacerDebugger>().UpdateDebug(predicted, closestPoint, closestTan);
+
+
+            // Step 3: move racer to spline centerline
+            racer.transform.position += (closestPoint - racer.transform.position).normalized * racer.runningSpeed * Time.deltaTime;
+
+            // Step 4: rotate racer to face along tangent
+            Quaternion targetRot = Quaternion.LookRotation(closestTan, Vector3.up);
+            racer.transform.rotation = targetRot;
+
+            // Step 5: update racer status
+            status.position = racer.transform.position;
+            status.heading = targetRot;
+            status.tangent = closestTan;
+            status.normal = closestNormal;
         }
+
     }
+
+
+
+
+    // Step 4: store new state
 
     private void UpdateRacerStatus(ref RacerStatus racerStatus)
     {
@@ -66,6 +97,9 @@ public class Race : MonoBehaviour
             Quaternion heading = Quaternion.LookRotation(startSample.Tangent, Vector3.up);
             RacerStatus racerStatus = new RacerStatus(racerPath, startSample.Position, startSample.Tangent, startSample.Normal, heading);
             racersStatus.Add(racerList[i], racerStatus);
+
+            racerList[i].transform.position = startSample.Position;
+            racerList[i].transform.rotation = heading;
         }
         
 
@@ -77,9 +111,10 @@ public class Race : MonoBehaviour
 
         foreach (RacerStatus racerStatus in racersStatus.Values)
         {
+            //Gizmos.DrawRay(racerStatus.position, racerStatus.tangent);
             foreach (SegmentSample s in racerStatus.currentPath.GetSamplesTable())
             {
-                Gizmos.DrawWireSphere(s.Position, 1);
+                Gizmos.DrawWireSphere(s.Position, 0.5f);
             }
         }
     }

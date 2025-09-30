@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // The current status of a racer in a race
-public struct RacerStatus
+public class RacerStatus
 {
     public SplinePath currentPath;
 
