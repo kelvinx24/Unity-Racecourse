@@ -5,6 +5,8 @@ using UnityEngine;
 // The current status of a racer in a race
 public class RacerStatus
 {
+    public RacerData racerData;
+
     public SplinePath currentPath;
 
     public Vector3 position;
@@ -13,6 +15,11 @@ public class RacerStatus
 
     public Quaternion heading;
     public float progress;
+
+    public bool Finished { get; set; }
+    public int GridIndex { get; set; }   // position on starting line
+
+
 
     public RacerStatus(SplinePath path, Vector3 position, Vector3 tangent, Vector3 normal, Quaternion heading)
     {
@@ -23,6 +30,7 @@ public class RacerStatus
         this.heading = heading;
 
         this.progress = 0;
+        Finished = false;
 
 
     }

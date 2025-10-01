@@ -1,18 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Jobs;
 using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEngine.GraphicsBuffer;
+
+public enum RaceState { Waiting, Countdown, Racing, Finished }
 
 // A race with racers that are running on a track
 public class Race : MonoBehaviour
 {
-    public List<Racer> racerList = new List<Racer>();
+    public static event Action OnRaceStarted;
+    public static event Action OnRaceEnded;
+
+    public List<RacerStatus> participatingRacers = new List<RacerStatus>();
 
     public Track track;
 
-    private Dictionary<Racer, RacerStatus> racersStatus = new Dictionary<Racer, RacerStatus>();
+    private RaceState state = RaceState.Waiting;
+
+
+    //private List<RacerStatus> racersStatus = new List<RacerStatus>();
 
     // Start is called before the first frame update
     void Start()
@@ -23,49 +31,45 @@ public class Race : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        foreach (KeyValuePair<Racer, RacerStatus> entry in racersStatus)
-        {
-            Racer racer = entry.Key;
-            RacerStatus status = entry.Value;
-
-            // Step 1: predict forward motion
-            Vector3 forwardMove = status.tangent * racer.runningSpeed * Time.deltaTime;
-            Vector3 predicted = status.position + forwardMove;
-
-            // Step 2: snap predicted point back onto spline
-            Vector3 closestPoint = status.currentPath.ClosestPointPosition(predicted, status.tangent);
-            Vector3 closestTan = status.currentPath.ClosestPointTangent(predicted, status.tangent).normalized;
-
-            // Optional: if you have a spline normal method
-            Vector3 closestNormal = Vector3.Cross(Vector3.up, closestTan).normalized;
-
-            racer.GetComponent<RacerDebugger>().UpdateDebug(predicted, closestPoint, closestTan);
-
-
-            // Step 3: move racer to spline centerline
-            racer.transform.position += (closestPoint - racer.transform.position).normalized * racer.runningSpeed * Time.deltaTime;
-
-            // Step 4: rotate racer to face along tangent
-            Quaternion targetRot = Quaternion.LookRotation(closestTan, Vector3.up);
-            racer.transform.rotation = targetRot;
-
-            // Step 5: update racer status
-            status.position = racer.transform.position;
-            status.heading = targetRot;
-            status.tangent = closestTan;
-            status.normal = closestNormal;
-        }
 
     }
 
-
-
-
-    // Step 4: store new state
-
-    private void UpdateRacerStatus(ref RacerStatus racerStatus)
+    public void BeginRace()
     {
+        StartCoroutine(StartRaceRoutine());
+    }
 
+    private IEnumerator StartRaceRoutine()
+    {
+        state = RaceState.Countdown;
+
+        for (int i = 3; i > 0; i--)
+        {
+            Debug.Log(i);
+            yield return new WaitForSeconds(1f);
+        }
+
+        Debug.Log("GO!");
+        state = RaceState.Racing;
+        OnRaceStarted?.Invoke();
+    }
+
+    public void CheckFinish(RacerStatus status)
+    {
+        if (state != RaceState.Racing)
+            return;
+
+        if (status.Finished)
+        {
+            state = RaceState.Finished;
+            Debug.Log($"{status.racerData.Name} wins!");
+            OnRaceEnded?.Invoke();
+        }
+    }
+
+    public void RegisterRacer(Racer racer)
+    {
+        participatingRacers.Add(racer);
     }
 
     private void InitiateRacers()
@@ -74,7 +78,7 @@ public class Race : MonoBehaviour
         SegmentSample startPoint = innerControlSamples[innerControlSamples.Count - 1];
 
         float trackWidth = track.trackSize;
-        int numRacers = racerList.Count;
+        int numRacers = participatingRacers.Count;
         float laneWidth = trackWidth / (float) numRacers;
 
         for (int i = 0; i < numRacers + 0; i++)
@@ -96,10 +100,11 @@ public class Race : MonoBehaviour
 
             Quaternion heading = Quaternion.LookRotation(startSample.Tangent, Vector3.up);
             RacerStatus racerStatus = new RacerStatus(racerPath, startSample.Position, startSample.Tangent, startSample.Normal, heading);
-            racersStatus.Add(racerList[i], racerStatus);
+            racerStatus.racerData = participatingRacers[i].racerData;
+            participatingRacers[i].currentStatus = racerStatus;
+            participatingRacers[i].racerController.status = racerStatus;
+            participatingRacers[i].racerController.race = this;
 
-            racerList[i].transform.position = startSample.Position;
-            racerList[i].transform.rotation = heading;
         }
         
 

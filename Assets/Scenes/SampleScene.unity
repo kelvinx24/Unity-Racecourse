@@ -665,6 +665,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 219745556}
+    - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 219745561}
   m_SourcePrefab: {fileID: 100100000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
 --- !u!1 &169764523 stripped
 GameObject:
@@ -684,8 +687,26 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   racerName: McQueen
-  runningSpeed: 10
+  runningSpeed: 20
   lateralMoveSpeed: 3
+--- !u!4 &169764528 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+  m_PrefabInstance: {fileID: 239312698}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &169764529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 169764523}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f1007480a529d45b74641e70e27680, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  racer: {fileID: 169764524}
 --- !u!1 &219745555 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
@@ -706,6 +727,19 @@ MonoBehaviour:
   racerName: McQueen
   runningSpeed: 10
   lateralMoveSpeed: 3
+--- !u!114 &219745561
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 219745555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f1007480a529d45b74641e70e27680, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  racer: {fileID: 219745556}
 --- !u!1 &237723731
 GameObject:
   m_ObjectHideFlags: 0
@@ -869,11 +903,17 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 3584317035670202739, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 963194228}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 169764524}
+    - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 169764529}
   m_SourcePrefab: {fileID: 100100000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
 --- !u!1 &266123342
 GameObject:
@@ -998,8 +1038,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   racerName: McQueen
-  runningSpeed: 10
+  runningSpeed: 1
   lateralMoveSpeed: 3
+--- !u!114 &392064628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 392064622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32f1007480a529d45b74641e70e27680, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  racer: {fileID: 392064623}
 --- !u!1 &507100684
 GameObject:
   m_ObjectHideFlags: 0
@@ -2192,13 +2245,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.22265464, y: 0, z: 0, w: 0.9748974}
+  m_LocalPosition: {x: 0, y: 1.77, z: -3.37}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_Father: {fileID: 169764528}
+  m_LocalEulerAnglesHint: {x: 25.73, y: 0, z: 0}
 --- !u!1 &1125632700
 GameObject:
   m_ObjectHideFlags: 0
@@ -3356,6 +3409,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
       insertIndex: -1
       addedObject: {fileID: 392064623}
+    - targetCorrespondingSourceObject: {fileID: 5106751102820358000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 392064628}
   m_SourcePrefab: {fileID: 100100000, guid: 8594dd9941e4a3245b7135866e2a23f8, type: 3}
 --- !u!1 &1401975572
 GameObject:
@@ -37883,15 +37939,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1597473005}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3d5fac92fff767b45846b01fd093988c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   racerList:
   - {fileID: 169764524}
-  targetRacerOffset: []
-  laneSize: 3
+  track: {fileID: 1597473009}
 --- !u!4 &1597473008
 Transform:
   m_ObjectHideFlags: 0
@@ -37936,7 +37991,7 @@ MonoBehaviour:
   - {fileID: 92610179}
   - {fileID: 1437758817}
   - {fileID: 1125632704}
-  laneSize: 10
+  trackSize: 10
   splinePrefab: {fileID: 5746086860954144375, guid: 35b0cee8a519e5a498345841d755af09, type: 3}
   samplesPerSegment: 100
 --- !u!1 &1666443077
@@ -42595,8 +42650,7 @@ MonoBehaviour:
   - {fileID: 169764524}
   - {fileID: 219745556}
   - {fileID: 392064623}
-  targetRacerOffset: []
-  laneSize: 3
+  track: {fileID: 0}
 --- !u!43 &2046109343
 Mesh:
   m_ObjectHideFlags: 0
@@ -42974,7 +43028,6 @@ PrefabInstance:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
-  - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 1196065534}
   - {fileID: 564657714}
