@@ -13,9 +13,13 @@ public class Race : MonoBehaviour
     public static event Action OnRaceStarted;
     public static event Action OnRaceEnded;
 
-    public List<RacerStatus> participatingRacers = new List<RacerStatus>();
+    public List<Racer> participatingRacers = new List<Racer>();
+
+    public List<RacerStatus> racerStatuses = new List<RacerStatus>();
 
     public Track track;
+
+    private RacerSpawner spawner;
 
     private RaceState state = RaceState.Waiting;
 
@@ -67,9 +71,9 @@ public class Race : MonoBehaviour
         }
     }
 
-    public void RegisterRacer(Racer racer)
+    public void RegisterRacer(Racer data)
     {
-        participatingRacers.Add(racer);
+        participatingRacers.Add(data);
     }
 
     private void InitiateRacers()
@@ -101,9 +105,8 @@ public class Race : MonoBehaviour
             Quaternion heading = Quaternion.LookRotation(startSample.Tangent, Vector3.up);
             RacerStatus racerStatus = new RacerStatus(racerPath, startSample.Position, startSample.Tangent, startSample.Normal, heading);
             racerStatus.racerData = participatingRacers[i].racerData;
-            participatingRacers[i].currentStatus = racerStatus;
-            participatingRacers[i].racerController.status = racerStatus;
-            participatingRacers[i].racerController.race = this;
+
+            spawner.SpawnRacer(this, racerStatus);
 
         }
         
@@ -114,7 +117,7 @@ public class Race : MonoBehaviour
     {
         Gizmos.color = Color.red;
 
-        foreach (RacerStatus racerStatus in racersStatus.Values)
+        foreach (RacerStatus racerStatus in racerStatuses)
         {
             //Gizmos.DrawRay(racerStatus.position, racerStatus.tangent);
             foreach (SegmentSample s in racerStatus.currentPath.GetSamplesTable())
