@@ -60,6 +60,21 @@ public class SplineCreator
         return new SplinePath(controlPointPositions, controlPointSamples, samples, cumulative);
     }
 
+    public static SplinePath CreateNewOffsetSplineByNormal(SplinePath current, float factor, int samplesPerSegment)
+    {
+        List<Vector3> outerControlPoints = new List<Vector3>();
+        List<SegmentSample> controlPointSamples = current.GetControlPointSamples();
+
+        for (int i = 0; i < controlPointSamples.Count; i++)
+        {
+            Vector3 pointNormal = controlPointSamples[i].Normal;
+            Vector3 offsetPosition = controlPointSamples[i].Position + pointNormal * factor;
+            outerControlPoints.Add(offsetPosition);
+        }
+
+        return CreateSplinePath(outerControlPoints, samplesPerSegment);
+    }
+
     // Generate a point on a curve using Catmull-Rom based on what t is currently.
     // Connects p0 and p1 with a curve based on its neighbors (pPrev and pNext)
     public static Vector3 CatmullRomPoint(Vector3 pPrev, Vector3 p0, Vector3 p1, Vector3 pNext, float t)

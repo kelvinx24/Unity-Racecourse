@@ -19,7 +19,7 @@ public class Race : MonoBehaviour
 
     public Track track;
 
-    private RacerSpawner spawner;
+    public RacerSpawner spawner;
 
     private RaceState state = RaceState.Waiting;
 
@@ -35,7 +35,6 @@ public class Race : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
     }
 
     public void BeginRace()
@@ -105,6 +104,7 @@ public class Race : MonoBehaviour
             Quaternion heading = Quaternion.LookRotation(startSample.Tangent, Vector3.up);
             RacerStatus racerStatus = new RacerStatus(racerPath, startSample.Position, startSample.Tangent, startSample.Normal, heading);
             racerStatus.racerData = participatingRacers[i].racerData;
+            racerStatuses.Add(racerStatus);
 
             spawner.SpawnRacer(this, racerStatus);
 

@@ -2,16 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum RaceMode { Outside, Inside, Follow }
+
 public class RacerAI : MonoBehaviour
 {
-    protected RacerStatus status;
+    public RacerStatus status { get; private set; }
+    public Race race { get; private set; }
+
+    public RaceMode raceMode = RaceMode.Follow;
+
+    private IRacerState currentState;
+
     private bool canMove = false;
-    private Race race;
 
     public void Initialize(RacerStatus racerStatus, Race race)
     {
         status = racerStatus;
         this.race = race;
+
+        ChangeState(new RacingState(this));
     }
 
     private void OnEnable()
@@ -36,10 +45,16 @@ public class RacerAI : MonoBehaviour
         canMove = false;
     }
 
+    public void ChangeState(IRacerState newState)
+    {
+        currentState?.Exit();
+        currentState = newState;
+        currentState?.Enter();
+    }
+
     private void Update()
     {
-        if (canMove)
-            Advance();
+        currentState?.Update();
     }
 
     private void Advance()

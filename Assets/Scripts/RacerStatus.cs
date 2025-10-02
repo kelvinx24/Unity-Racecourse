@@ -17,8 +17,6 @@ public class RacerStatus
     public float progress;
 
     public bool Finished { get; set; }
-    public int GridIndex { get; set; }   // position on starting line
-
 
 
     public RacerStatus(SplinePath path, Vector3 position, Vector3 tangent, Vector3 normal, Quaternion heading)
@@ -31,7 +29,6 @@ public class RacerStatus
 
         this.progress = 0;
         Finished = false;
-
 
     }
 }
