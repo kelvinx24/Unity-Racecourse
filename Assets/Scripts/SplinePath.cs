@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -35,6 +36,99 @@ public class SplinePath
         //return samplesTable[bestIndex].Position;
         return RefineClosestPosition(target, bestIndex);
     }
+
+    public ClosestSample ClosestSample(Vector3 target, Vector3 targetDirection)
+    {
+        int bestIndex = FindClosestSampleIndex(target, targetDirection);
+        Vector3 closestPos =  RefineClosestPosition(target, bestIndex);
+        Vector3 closestTan = RefineClosestTangent(target, bestIndex);
+
+        return new ClosestSample(closestTan, closestPos, bestIndex);
+    }
+
+    public (Vector3 position, Vector3 tangent, float distance) FindRefinedClosestSample(Vector3 target, Vector3 targetDirection)
+    {
+
+        int bestIndex = FindClosestSampleIndex(target, targetDirection);
+        return RefineClosestSample(target, bestIndex);
+    }
+
+    public (Vector3 position, Vector3 tangent, float distance) RefineClosestSample(Vector3 target, int bestIndex)
+    {
+        // Get the best current point
+        Vector3 bestPoint = samplesTable[bestIndex].Position;
+        Vector3 bestTangent = samplesTable[bestIndex].Tangent;
+        float bestDistance = samplesTable[bestIndex].Cumulative;
+
+        // Check segment before
+        if (bestIndex > 0)
+        {
+            var prev = samplesTable[bestIndex - 1];
+            (Vector3 proj, float t) = ClosestPointOnSegmentWithParam(prev.Position, samplesTable[bestIndex].Position, target);
+            Vector3 candidateTangent = Vector3.Lerp(prev.Tangent, samplesTable[bestIndex].Tangent, t).normalized;
+            float candidateDistance = Mathf.Lerp(prev.Cumulative, samplesTable[bestIndex].Cumulative, t);
+
+            if ((proj - target).sqrMagnitude < (bestPoint - target).sqrMagnitude)
+            {
+                bestPoint = proj;
+                bestTangent = candidateTangent;
+                bestDistance = candidateDistance;
+            }
+        }
+
+        // Check segment after
+        if (bestIndex < samplesTable.Count - 1)
+        {
+            var next = samplesTable[bestIndex + 1];
+            (Vector3 proj, float t) = ClosestPointOnSegmentWithParam(samplesTable[bestIndex].Position, next.Position, target);
+            Vector3 candidateTangent = Vector3.Lerp(samplesTable[bestIndex].Tangent, next.Tangent, t).normalized;
+            float candidateDistance = Mathf.Lerp(samplesTable[bestIndex].Cumulative, next.Cumulative, t);
+
+            if ((proj - target).sqrMagnitude < (bestPoint - target).sqrMagnitude)
+            {
+                bestPoint = proj;
+                bestTangent = candidateTangent;
+                bestDistance = candidateDistance;
+            }
+        }
+
+        return (bestPoint, bestTangent, bestDistance);
+    }
+
+    public (int index, float t) FindClosestSampleByDistance(float targetDistance)
+    {
+        if (samplesTable == null || samplesTable.Count == 0)
+            throw new InvalidOperationException("Samples table is empty.");
+
+        // Clamp target distance to valid spline range
+        targetDistance = Mathf.Clamp(targetDistance, 0f, samplesTable[^1].Cumulative);
+
+        // Binary search for efficiency
+        int low = 0;
+        int high = samplesTable.Count - 1;
+
+        while (low <= high)
+        {
+            int mid = (low + high) / 2;
+            float midDist = samplesTable[mid].Cumulative;
+
+            if (midDist < targetDistance)
+                low = mid + 1;
+            else
+                high = mid - 1;
+        }
+
+        // 'low' is now the first index whose distance >= targetDistance
+        int index = Mathf.Clamp(low - 1, 0, samplesTable.Count - 2);
+        var a = samplesTable[index];
+        var b = samplesTable[index + 1];
+
+        float segmentLength = b.Cumulative - a.Cumulative;
+        float t = segmentLength > 0f ? (targetDistance - a.Cumulative) / segmentLength : 0f;
+
+        return (index, t);
+    }
+
 
     // Returns the tangent at the closest point
     public Vector3 ClosestPointTangent(Vector3 target, Vector3 targetDirection)

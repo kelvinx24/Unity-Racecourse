@@ -44,7 +44,7 @@ public class SplineCreator
 
                 // Cache sample information in table to be accessed later  
                 // to map distance traveled to segment and segment progress (t)
-                SegmentSample sample = new SegmentSample(cumulative, i, segT, curvePoint, tangent, normal);
+                SegmentSample sample = new SegmentSample(cumulative, samples.Count, i, segT, curvePoint, tangent, normal);
                 samples.Add(sample);
                 //Debug.Log(segmentSamples[sampleIndex]); 
 

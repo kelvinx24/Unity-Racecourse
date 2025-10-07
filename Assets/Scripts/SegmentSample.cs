@@ -4,6 +4,7 @@ using UnityEngine;
 
 public record SegmentSample(
   float Cumulative,
+  int OveralIndex,
   int SegmentIndex,
   float SegmentT,
   Vector3 Position,

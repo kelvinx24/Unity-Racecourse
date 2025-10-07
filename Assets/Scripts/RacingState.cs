@@ -41,13 +41,14 @@ public class RacingState : IRacerState
         Vector3 predicted = status.position + forwardMove;
 
         // Step 2: snap predicted point back onto spline
-        Vector3 closestPoint = path.ClosestPointPosition(predicted, status.tangent);
-        Vector3 closestTan = path.ClosestPointTangent(predicted, status.tangent).normalized;
+        ClosestSample cs = path.ClosestSample(predicted, status.tangent);
+        Vector3 closestPoint = cs.Position;
+        Vector3 closestTan = cs.Tangent.normalized;
 
         // Optional: if you have a spline normal method
         Vector3 closestNormal = Vector3.Cross(Vector3.up, closestTan).normalized;
 
-        // Step 3: move racer to spline centerline
+        // Step 3: move racer to closest point on spline
         controller.transform.position += (closestPoint - controller.transform.position).normalized * racingSpeed * Time.deltaTime;
 
         // Step 4: rotate racer to face along tangent
@@ -61,6 +62,8 @@ public class RacingState : IRacerState
         status.normal = closestNormal;
     }
 
+	// Theoretically no need to calculate a new path. 
+	// Can continously calculate next position with tangent of closest point of spline.
     private void RecalculatePath()
     {
         SplinePath innerSpline = controller.race.track.GetInnerSpline();
@@ -70,6 +73,23 @@ public class RacingState : IRacerState
 
         SplinePath newPath = SplineCreator.CreateNewOffsetSplineByNormal(innerSpline, distance, 100);
         controller.status.currentPath = newPath;
+    }
+
+    private void LookaheadRefinedSample(float lookDistance)
+    {
+        SplinePath path = controller.status.currentPath;
+        var cs = path.FindRefinedClosestSample(controller.status.position, controller.status.tangent);
+        
+        path.FindClosestSampleByDistance(lookDistance + cs.distance);
+    }
+
+    private void LookaheadSample(int samplesAmount)
+    {
+        SplinePath splinePath = controller.status.currentPath;
+        ClosestSample cs = splinePath.ClosestSample(controller.status.position, controller.status.tangent);
+
+        int lookaheadSampleIdx = samplesAmount + cs.ClosestIndex;
+        SegmentSample s = splinePath.GetSamplesTable()[lookaheadSampleIdx];
     }
 
     public void Exit() { }
