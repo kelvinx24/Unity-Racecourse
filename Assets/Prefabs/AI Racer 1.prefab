@@ -213,7 +213,7 @@ GameObject:
   - component: {fileID: 3244189823961912468}
   - component: {fileID: 441255916690132438}
   m_Layer: 0
-  m_Name: AI Racer
+  m_Name: AI Racer 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -323,7 +323,7 @@ MonoBehaviour:
   BaseSpeed: 10
   Acceleration: 0.5
   Deceleration: 3
-  Cornering: 1
+  Cornering: 2
 --- !u!114 &3244189823961912468
 MonoBehaviour:
   m_ObjectHideFlags: 0

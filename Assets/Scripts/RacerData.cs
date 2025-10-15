@@ -8,4 +8,6 @@ public class RacerData : MonoBehaviour
     public string Name;
     public float BaseSpeed;
     public float Acceleration;
+    public float Deceleration;
+    public float Cornering;
 }

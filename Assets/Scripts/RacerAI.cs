@@ -11,7 +11,7 @@ public class RacerAI : MonoBehaviour
 
     public RaceMode raceMode = RaceMode.Follow;
 
-    private IRacerState currentState;
+    public RacingState currentState;
 
     private bool canMove = false;
 
@@ -45,7 +45,7 @@ public class RacerAI : MonoBehaviour
         canMove = false;
     }
 
-    public void ChangeState(IRacerState newState)
+    public void ChangeState(RacingState newState)
     {
         currentState?.Exit();
         currentState = newState;
@@ -55,10 +55,18 @@ public class RacerAI : MonoBehaviour
     private void Update()
     {
         currentState?.Update();
+        Debug.Log("Current Speed: " + currentState.racingSpeed);
     }
 
     private void Advance()
     {
 
+    }
+
+    private void OnDrawGizmos()
+    {
+        SegmentSample s = currentState.lookAheadSample;
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireCube(s.Position, new Vector3(1, 1, 1));
     }
 }

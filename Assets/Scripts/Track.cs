@@ -72,11 +72,13 @@ public class Track : MonoBehaviour
     private void CreateSplineSampleObjects()
     {
         List<SegmentSample> innerSamples = innerSpline.GetSamplesTable();
+        GameObject parent = new GameObject("Track Objects");
 
         foreach (SegmentSample sample in innerSamples)
         {
             GameObject gameObject = Instantiate(splinePrefab, sample.Position, Quaternion.identity);
             innerSplineObjects.Add(gameObject);
+            gameObject.transform.SetParent(parent.transform, true);
         }
 
         List<SegmentSample> outerSamples = outerSpline.GetSamplesTable();
@@ -84,6 +86,8 @@ public class Track : MonoBehaviour
         {
             GameObject gameObject = Instantiate(splinePrefab, sample.Position, Quaternion.identity);
             innerSplineObjects.Add(gameObject);
+            gameObject.transform.SetParent(parent.transform, true);
+
         }
     }
 

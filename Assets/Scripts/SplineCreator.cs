@@ -42,9 +42,11 @@ public class SplineCreator
                 float arcLength = Mathf.Sqrt(distanceY * distanceY + distanceX * distanceX);
                 cumulative += arcLength;
 
+                float curvature = Curvature(prevNeighbor, start, end, endNeighbor, segT);
+
                 // Cache sample information in table to be accessed later  
                 // to map distance traveled to segment and segment progress (t)
-                SegmentSample sample = new SegmentSample(cumulative, samples.Count, i, segT, curvePoint, tangent, normal);
+                SegmentSample sample = new SegmentSample(cumulative, samples.Count, i, segT, curvePoint, tangent, normal, curvature);
                 samples.Add(sample);
                 //Debug.Log(segmentSamples[sampleIndex]); 
 

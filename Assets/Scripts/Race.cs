@@ -119,7 +119,7 @@ public class Race : MonoBehaviour
 
         foreach (RacerStatus racerStatus in racerStatuses)
         {
-            //Gizmos.DrawRay(racerStatus.position, racerStatus.tangent);
+            Gizmos.DrawRay(racerStatus.position, racerStatus.tangent);
             foreach (SegmentSample s in racerStatus.currentPath.GetSamplesTable())
             {
                 Gizmos.DrawWireSphere(s.Position, 0.5f);
